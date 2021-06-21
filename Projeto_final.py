@@ -48,11 +48,22 @@ def enhance_image(image):
 #####################################################################################################################
   
 def main():
+    #Carregando a imagem
     filename = input().rstrip()
     image = im.imread(filename)
+    
+    #Aplicando o enchancement
     img_apri = enhance_image(image)
+    
+    #Plotando um comparativo entre a imagem de entrada e a imagem após o enhancement
+    plt.figure(figsize=(20,20))
+
+    plt.subplot(121)
     plt.imshow(image, cmap="gray", vmin=0, vmax=255)
-    plt.show()
+    plt.axis('off')
+    plt.subplot(122)
     plt.imshow(img_apri, cmap="gray", vmin=0, vmax=255)
+    plt.axis('off')
+    plt.show()
     
 main()
