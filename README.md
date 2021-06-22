@@ -14,7 +14,9 @@ Exemplos:
 
 **Passos**:
 -  Alicar técnicas de enhancement nas fotos que forem necessárias.
--  Colorir as fotos através de técnicas de CNN ou DeepLearning.
+   1. Aplicaremos a técnica de histograma cumulativo e histograma equalization.
+   2. Utilizaremos a imagem resultante do passo anterior para colorir.
+-  Colorir as imagens através de técnicas de CNN ou DeepLearning.
  
 
-Código inicial:
+Código inicial: Projeto_final.py
