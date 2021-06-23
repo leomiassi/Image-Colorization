@@ -50,6 +50,7 @@ def enhance_image(image):
 def main():
     #Carregando a imagem
     filename = input().rstrip()
+    filename = "bw_images/" + filename #Adicionando o repositório no nome
     image = im.imread(filename)
     
     #Aplicando o enchancement
@@ -57,13 +58,20 @@ def main():
     
     #Plotando um comparativo entre a imagem de entrada e a imagem após o enhancement
     plt.figure(figsize=(20,20))
-
-    plt.subplot(121)
+    #plt.subplot(121)
     plt.imshow(image, cmap="gray", vmin=0, vmax=255)
     plt.axis('off')
-    plt.subplot(122)
+    plt.show()
+    
+    plt.figure(figsize=(20,20))
+    #plt.subplot(122)
     plt.imshow(img_apri, cmap="gray", vmin=0, vmax=255)
     plt.axis('off')
     plt.show()
+    
+    #Salvando a imagem gerada em um arquivo
+    filename = re.split("\/", filename)[1] #Usando regex para extrair o nome da imagem.
+    filename = "results_enhancement/" + filename #Adicionando o repositório no nome
+    im.imwrite(filename, img_apri)  #Salvando a imagem
     
 main()
