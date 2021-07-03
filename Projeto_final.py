@@ -46,6 +46,14 @@ def enhance_image(image):
     return img_new
   
 #####################################################################################################################
+
+def color_img(filename):
+  img = cv2.imread(filename,0)
+  img = np.array(img, dtype=np.uint8)
+  plt.imshow(cv2.cvtColor(img, cv2.COLOR_GRAY2RGB))
+  plt.show()
+  
+##################################################################################################################### 
   
 def main():
     #Carregando a imagem
