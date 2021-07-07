@@ -2,7 +2,8 @@ import numpy as np
 import imageio as im
 import math
 import matplotlib.pyplot as plt
-
+import cv2
+import copy
 
 #####################################################################################################################
 
@@ -28,7 +29,7 @@ def histogram(image, no_levels):
 
 def histogram_equalization(image, no_levels, histC):
     
-    N, M = image.shape# O tamanho da imagem
+    N, M = image.shape[0], image.shape[1]# O tamanho da imagem
     
     image_eq = np.zeros([N,M]).astype(np.uint8)# Cria uma matriz vazia para armazenar a imagem equalizada
     
@@ -42,44 +43,98 @@ def histogram_equalization(image, no_levels, histC):
 #####################################################################################################################
   
 def enhance_image(image):
-    img_new = histogram_equalization(image, 256, histogram(image, 256))
+    img_new = copy.copy(image)
+
+    image1 = image[:,:,0]
+    image2 = image[:,:,1]
+    image3 = image[:,:,2]
+    img_new1 = histogram_equalization(image1, 256, histogram(image1, 256))
+    img_new2 = histogram_equalization(image2, 256, histogram(image2, 256))
+    img_new3 = histogram_equalization(image3, 256, histogram(image3, 256))
+
+    img_new[:,:,0] = img_new1
+    img_new[:,:,1] = img_new2
+    img_new[:,:,2] = img_new3
+
     return img_new
   
-#####################################################################################################################
+##################################################################################################################### 
 
-def color_img(filename):
-  img = cv2.imread(filename,0)
-  img = np.array(img, dtype=np.uint8)
-  plt.imshow(cv2.cvtColor(img, cv2.COLOR_GRAY2RGB))
-  plt.show()
-  
+def coloring(image):
+
+  prototxt = '/content/drive/MyDrive/Semestre 9/Processamento de Imagens/Trabalho Final/Imagens/colorization_deploy_v2.prototxt'
+  model = '/content/drive/MyDrive/Semestre 9/Processamento de Imagens/Trabalho Final/Imagens/colorization_release_v2.caffemodel'
+  points = '/content/drive/MyDrive/Semestre 9/Processamento de Imagens/Trabalho Final/Imagens/pts_in_hull.npy'
+
+  # load our serialized black and white colorizer model and cluster
+  # center points from disk
+  print("[INFO] loading model...")
+  net = cv2.dnn.readNetFromCaffe(prototxt, model)
+  pts = np.load(points)
+  # add the cluster centers as 1x1 convolutions to the model
+  class8 = net.getLayerId("class8_ab")
+  conv8 = net.getLayerId("conv8_313_rh")
+  pts = pts.transpose().reshape(2, 313, 1, 1)
+  net.getLayer(class8).blobs = [pts.astype("float32")]
+  net.getLayer(conv8).blobs = [np.full([1, 313], 2.606, dtype="float32")]
+  # load the input image from disk, scale the pixel intensities to the
+  # range [0, 1], and then convert the image from the BGR to Lab color
+  # space
+  #image = cv2.imread(image)
+  scaled = image.astype("float32") / 255.0
+  lab = cv2.cvtColor(scaled, cv2.COLOR_BGR2LAB)
+  # resize the Lab image to 224x224 (the dimensions the colorization
+  # network accepts), split channels, extract the 'L' channel, and then
+  # perform mean centering
+  resized = cv2.resize(lab, (224, 224))
+  L = cv2.split(resized)[0]
+  L -= 50
+  # pass the L channel through the network which will *predict* the 'a'
+  # and 'b' channel values
+  'print("[INFO] colorizing image...")'
+  net.setInput(cv2.dnn.blobFromImage(L))
+  ab = net.forward()[0, :, :, :].transpose((1, 2, 0))
+  # resize the predicted 'ab' volume to the same dimensions as our
+  # input image
+  ab = cv2.resize(ab, (image.shape[1], image.shape[0]))
+  # grab the 'L' channel from the *original* input image (not the
+  # resized one) and concatenate the original 'L' channel with the
+  # predicted 'ab' channels
+  L = cv2.split(lab)[0]
+  colorized = np.concatenate((L[:, :, np.newaxis], ab), axis=2)
+  # convert the output image from the Lab color space to RGB, then
+  # clip any values that fall outside the range [0, 1]
+  colorized = cv2.cvtColor(colorized, cv2.COLOR_LAB2BGR)
+  colorized = np.clip(colorized, 0, 1)
+  # the current colorized image is represented as a floating point
+  # data type in the range [0, 1] -- let's convert to an unsigned
+  # 8-bit integer representation in the range [0, 255]
+  colorized = (255 * colorized).astype("uint8")
+  # show the original and output colorized images
+  cv2_imshow(image1)
+  cv2_imshow(image)
+  cv2_imshow(colorized)
+  cv2.waitKey(0)
+  return colorized
+
 ##################################################################################################################### 
   
 def main():
     #Carregando a imagem
     filename = input().rstrip()
-    filename = "bw_images/" + filename #Adicionando o repositório no nome
-    image = im.imread(filename)
+    #filename = "bw_images/" + filename #Adicionando o repositório no nome
+    image1 = cv2.imread(filename)
     
     #Aplicando o enchancement
-    img_apri = enhance_image(image)
+    image = enhance_image(image1)
+    
+    image = coloring(image)
     
     #Plotando um comparativo entre a imagem de entrada e a imagem após o enhancement
-    plt.figure(figsize=(20,20))
-    #plt.subplot(121)
-    plt.imshow(image, cmap="gray", vmin=0, vmax=255)
-    plt.axis('off')
-    plt.show()
-    
-    plt.figure(figsize=(20,20))
-    #plt.subplot(122)
-    plt.imshow(img_apri, cmap="gray", vmin=0, vmax=255)
-    plt.axis('off')
-    plt.show()
     
     #Salvando a imagem gerada em um arquivo
-    filename = re.split("\/", filename)[1] #Usando regex para extrair o nome da imagem.
-    filename = "results_enhancement/" + filename #Adicionando o repositório no nome
-    im.imwrite(filename, img_apri)  #Salvando a imagem
+    #filename = re.split("\/", filename)[1] #Usando regex para extrair o nome da imagem.
+    #filename = "results_enhancement/" + filename #Adicionando o repositório no nome
+    #im.imwrite(filename, image)  #Salvando a imagem
     
 main()
