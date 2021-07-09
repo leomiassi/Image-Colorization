@@ -114,6 +114,8 @@ def coloring(image):
   cv2_imshow(image1)
   cv2_imshow(image)
   cv2_imshow(colorized)
+  #cv2.imshow("Original", image)
+  #cv2.imshow("Colorized", colorized)
   cv2.waitKey(0)
   return colorized
 
