@@ -4,7 +4,11 @@ import math
 import matplotlib.pyplot as plt
 import cv2
 import copy
-import re
+
+#####################################################################################################################
+
+def correcao_gamma(imagem, gamma):
+  return np.floor(255 * (((imagem)/255.0)**(1/gamma)))
 
 #####################################################################################################################
 
@@ -43,7 +47,7 @@ def histogram_equalization(image, no_levels, histC):
   
 #####################################################################################################################
   
-def enhance_image(image):
+def enhance_image1(image):
     img_new = copy.copy(image)
 
     image1 = image[:,:,0]
@@ -52,6 +56,24 @@ def enhance_image(image):
     img_new1 = histogram_equalization(image1, 256, histogram(image1, 256))
     img_new2 = histogram_equalization(image2, 256, histogram(image2, 256))
     img_new3 = histogram_equalization(image3, 256, histogram(image3, 256))
+
+    img_new[:,:,0] = img_new1
+    img_new[:,:,1] = img_new2
+    img_new[:,:,2] = img_new3
+
+    return img_new
+  
+#####################################################################################################################
+
+def enhance_image2(image,gamma):
+    img_new = copy.copy(image)
+
+    image1 = image[:,:,0]
+    image2 = image[:,:,1]
+    image3 = image[:,:,2]
+    img_new1 = correcao_gamma(image1, gamma).astype(np.uint8)
+    img_new2 = correcao_gamma(image2, gamma).astype(np.uint8)
+    img_new3 = correcao_gamma(image3, gamma).astype(np.uint8)
 
     img_new[:,:,0] = img_new1
     img_new[:,:,1] = img_new2
@@ -112,6 +134,8 @@ def coloring(image):
   # 8-bit integer representation in the range [0, 255]
   colorized = (255 * colorized).astype("uint8")
   # show the original and output colorized images
+  cv2.imshow("Original", image)
+  cv2.imshow("Colorized", colorized)
   #cv2_imshow(image1)
   #cv2_imshow(image)
   #cv2_imshow(colorized)
@@ -128,7 +152,8 @@ def main():
     image1 = cv2.imread(filename)
     
     #Aplicando o enchancement
-    image = enhance_image(image1)
+    image = enhance_image1(image1)
+    image = enhance_image2(image1)
     
     #Aplicando a colorizaçao
     image = coloring(image)
