@@ -4,6 +4,7 @@ import math
 import matplotlib.pyplot as plt
 import cv2
 import copy
+import re
 
 #####################################################################################################################
 
@@ -62,9 +63,9 @@ def enhance_image(image):
 
 def coloring(image):
 
-  prototxt = '/content/drive/MyDrive/Semestre 9/Processamento de Imagens/Trabalho Final/Imagens/colorization_deploy_v2.prototxt'
-  model = '/content/drive/MyDrive/Semestre 9/Processamento de Imagens/Trabalho Final/Imagens/colorization_release_v2.caffemodel'
-  points = '/content/drive/MyDrive/Semestre 9/Processamento de Imagens/Trabalho Final/Imagens/pts_in_hull.npy'
+  prototxt = 'modelos/colorization_deploy_v2.prototxt'
+  model = 'modelos/colorization_release_v2.caffemodel'
+  points = 'modelos/pts_in_hull.npy'
 
   # load our serialized black and white colorizer model and cluster
   # center points from disk
@@ -111,10 +112,10 @@ def coloring(image):
   # 8-bit integer representation in the range [0, 255]
   colorized = (255 * colorized).astype("uint8")
   # show the original and output colorized images
-  cv2_imshow(image1)
-  cv2_imshow(image)
-  cv2_imshow(colorized)
-  cv2.waitKey(0)
+  #cv2_imshow(image1)
+  #cv2_imshow(image)
+  #cv2_imshow(colorized)
+  #cv2.waitKey(0)
   return colorized
 
 ##################################################################################################################### 
@@ -122,19 +123,21 @@ def coloring(image):
 def main():
     #Carregando a imagem
     filename = input().rstrip()
-    #filename = "bw_images/" + filename #Adicionando o repositório no nome
+    filename = "bw_images/" + filename #Adicionando o repositório no nome
+    print(filename)
     image1 = cv2.imread(filename)
     
     #Aplicando o enchancement
     image = enhance_image(image1)
     
+    #Aplicando a colorizaçao
     image = coloring(image)
     
     #Plotando um comparativo entre a imagem de entrada e a imagem após o enhancement
     
     #Salvando a imagem gerada em um arquivo
-    #filename = re.split("\/", filename)[1] #Usando regex para extrair o nome da imagem.
-    #filename = "results_enhancement/" + filename #Adicionando o repositório no nome
-    #im.imwrite(filename, image)  #Salvando a imagem
+    filename = re.split("\/", filename)[1] #Usando regex para extrair o nome da imagem.
+    filename = "resultados/" + filename #Adicionando o repositório no nome
+    im.imwrite(filename, image)  #Salvando a imagem
     
 main()
