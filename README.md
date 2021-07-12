@@ -14,14 +14,18 @@ Exemplos:
 
 **Passos:**
 -  Aplicar técnicas de enhancement nas fotos que forem necessárias.
-   1. Aplicaremos a técnica de histograma cumulativo e histograma equalization.
+   1. Aplicaremos a técnica de histograma cumulativo, histograma equalization e gamma enhancement.
    2. Utilizaremos a imagem resultante do passo anterior para colorir.
--  Colorir as imagens através de técnicas de CNN ou DeepLearning.
+-  Colorir as imagens através de técnicas de CNN/DeepLearning.
+   1. Converter a imagen de entrada para o Lab color space.
+   2. Usar o canal L como entrada para a rede de treinamento tentar prever os canais 'a' e 'b'.
+   3. Combinar o canal L de entrada com os caneis 'a' e 'b' que foram previstos.
+   4. Converter a imagem do formato Lab para o formato RGB.
  
 
 **Código inicial:** Projeto_final.py
 
-**Resltado parcial:**
+**Resltados:**
 - Original:
    
    <img src="bw_images/The_fountain.jpg" width="700">
