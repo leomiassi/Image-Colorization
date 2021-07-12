@@ -29,6 +29,12 @@ Exemplos:
 - Original:
    
    <img src="bw_images/The_fountain.jpg" width="700">
-- Após enhancement:
+- Histogram Enhancement:
    
    <img src="results_enhancement/The_fountain.jpg" width="700">
+- Gamma Enhancement: 
+
+   <img src="resultados/gamma_The_fountain.jpg" width="700">
+- Colored:
+
+   <img src="resultados/color_gamma_The_fountain.jpg" width="700">
