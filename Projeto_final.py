@@ -86,54 +86,44 @@ def enhance_image2(image,gamma):
 def coloring(image):
 
     # Carregando os modelos
-    prototxt = 'modelos/colorization_deploy_v2.prototxt'
-    model = 'modelos/colorization_release_v2.caffemodel'
-    points = 'modelos/pts_in_hull.npy'
-
-    # load our serialized black and white colorizer model and cluster
-    # center points from disk
-    print("[INFO] loading model...")
-    net = cv2.dnn.readNetFromCaffe(prototxt, model)
-    pts = np.load(points)
-    
+    protoFile = '/content/drive/MyDrive/Semestre 9/Processamento de Imagens/Trabalho Final/Imagens/colorization_deploy_v2.prototxt'
+    weightsFile = '/content/drive/MyDrive/Semestre 9/Processamento de Imagens/Trabalho Final/Imagens/colorization_release_v2.caffemodel'
+  
+    # Carrega os pontos de cluster
+    pts_in_hull = np.load('/content/drive/MyDrive/Semestre 9/Processamento de Imagens/Trabalho Final/Imagens/pts_in_hull.npy')
+  
+    # Carrega a rede
+    net = cv2.dnn.readNetFromCaffe(protoFile, weightsFile)
+  
     # Add o centro do cluster como 1x1 convolutions para o modelo
-    class8 = net.getLayerId("class8_ab")
-    conv8 = net.getLayerId("conv8_313_rh")
-    pts = pts.transpose().reshape(2, 313, 1, 1)
-    net.getLayer(class8).blobs = [pts.astype("float32")]
-    net.getLayer(conv8).blobs = [np.full([1, 313], 2.606, dtype="float32")]
-    
-    # Carrega a imagem, escala os pixels de intesidade para o intervalo [0,1]
-    # depois converte a imagem para o formato Lab color space.
-    scaled = image.astype("float32") / 255.0
-    lab = cv2.cvtColor(scaled, cv2.COLOR_BGR2LAB)
-    
-    # Redimensiona a imagem para 224x224, que é a dimensão que a rede aceita.
-    # Depois separa os canais, extrai o canal L e por fim perfoma a média central:
-    resized = cv2.resize(lab, (224, 224))
-    L = cv2.split(resized)[0]
-    L -= 50
-    
-    # Passa o canal L para a network, onde irá predizer os possívels valores
-    # dos canais 'a' e 'b':
-    'print("[INFO] colorizing image...")'
-    net.setInput(cv2.dnn.blobFromImage(L))
-    ab = net.forward()[0, :, :, :].transpose((1, 2, 0))
-    
-    # Redimensiona 'ab' para os mesmos valores da imagem de entrada:
-    ab = cv2.resize(ab, (image.shape[1], image.shape[0]))
-    
-    # Seleciona o canal L da imagem de entrada e concatena com o canal 'ab' gerado pela rede
-    L = cv2.split(lab)[0]
-    colorized = np.concatenate((L[:, :, np.newaxis], ab), axis=2)
-    
-    # Converte a nova imagem de Lab para RGB
-    colorized = cv2.cvtColor(colorized, cv2.COLOR_LAB2BGR)
-    # Retira os valores que não fazer parte do intervalo [0,1]
-    colorized = np.clip(colorized, 0, 1)
-    
-    # Normaliza os valores para 255 e seta a imagem como uint8
-    colorized = (255 * colorized).astype("uint8")
+    pts_in_hull = pts_in_hull.transpose().reshape(2, 313, 1, 1)
+    net.getLayer(net.getLayerId('class8_ab')).blobs = [pts_in_hull.astype(np.float32)]
+    net.getLayer(net.getLayerId('conv8_313_rh')).blobs = [np.full([1, 313], 2.606, np.float32)]
+  
+    # Amostras do OpenCV
+    W_in = 224
+    H_in = 224
+  
+    img_rgb = (image[:,:,[2, 1, 0]] * 1.0 / 255).astype(np.float32)
+    # RGB em LAB
+    img_lab = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2Lab)
+    img_l = img_lab[:,:,0] # Pega o L
+  
+    # Faz um resize do L para o tamanho da rede de entrada
+    img_l_rs = cv2.resize(img_l, (W_in, H_in))
+    img_l_rs -= 50 # Subtrai 50 da média centralizada
+  
+    net.setInput(cv2.dnn.blobFromImage(img_l_rs))
+    ab_dec = net.forward()[0,:,:,:].transpose((1,2,0)) # O resultado
+  
+    (H_orig,W_orig) = img_rgb.shape[:2] # Tamanho original da imagem
+    ab_dec_us = cv2.resize(ab_dec, (W_orig, H_orig))
+    img_lab_out = np.concatenate((img_l[:,:,np.newaxis],ab_dec_us),axis=2) # Concatena com o L da imagem original
+    img_bgr_out = np.clip(cv2.cvtColor(img_lab_out, cv2.COLOR_Lab2BGR), 0, 1)
+  
+    colorized = (img_bgr_out*255).astype(np.uint8)
+    cv2_imshow(image)
+    cv2_imshow(colorized)
     
     # Retornando a imagem colorida
     return colorized
