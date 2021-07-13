@@ -86,11 +86,11 @@ def enhance_image2(image,gamma):
 def coloring(image):
 
     # Carregando os modelos
-    protoFile = '/content/drive/MyDrive/Semestre 9/Processamento de Imagens/Trabalho Final/Imagens/colorization_deploy_v2.prototxt'
-    weightsFile = '/content/drive/MyDrive/Semestre 9/Processamento de Imagens/Trabalho Final/Imagens/colorization_release_v2.caffemodel'
+    protoFile = 'modelos/colorization_deploy_v2.prototxt'
+    weightsFile = 'modelos/Imagens/colorization_release_v2.caffemodel'
   
     # Carrega os pontos de cluster
-    pts_in_hull = np.load('/content/drive/MyDrive/Semestre 9/Processamento de Imagens/Trabalho Final/Imagens/pts_in_hull.npy')
+    pts_in_hull = np.load('modelos/Imagens/pts_in_hull.npy')
   
     # Carrega a rede
     net = cv2.dnn.readNetFromCaffe(protoFile, weightsFile)
