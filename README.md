@@ -1,4 +1,4 @@
-# ImageProcessing
+# Image Colorization
 
 **Image Colorization**
 
@@ -22,8 +22,6 @@ Exemplos:
    3. Combinar o canal L de entrada com os caneis 'a' e 'b' que foram previstos.
    4. Converter a imagem do formato Lab para o formato RGB.
  
-
-**Código inicial:** Projeto_final.py
 
 **Resltados:**
 - Original:
