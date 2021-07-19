@@ -13,7 +13,7 @@ Exemplos:
 
 
 **Passos:**
--  Aplicar técnicas de enhancement nas fotos que forem necessárias.
+-  Aplicar técnicas de enhancement nas fotos.
    1. Aplicaremos a técnica de histograma cumulativo, histograma equalization e gamma enhancement.
    2. Utilizaremos a imagem resultante do passo anterior para colorir.
 -  Colorir as imagens através de técnicas de CNN/DeepLearning.
